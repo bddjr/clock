@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>时钟</title>
+<link rel="preload" as="font" type="font/woff2"
+      href="./fonts/HarmonyOS_Sans_SC_Regular-subset.woff2" crossorigin>
+<style>
+  @font-face {
+    font-family: "HarmonyOS Sans SC";
+    src: url("./fonts/HarmonyOS_Sans_SC_Regular-subset.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  :root {
+    color-scheme: dark;
+    --bg: #000000;
+    --dial: hsl(0 0% 7% / 1);
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+    --red: #ef4444;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(10px, 2.6vh, 26px);
+    padding: clamp(10px, 2.5vh, 32px) clamp(10px, 4vw, 32px);
+    background: var(--bg);
+    color: var(--text);
+    font-family: "HarmonyOS Sans SC", system-ui, -apple-system,
+                 "PingFang SC", "Microsoft YaHei", sans-serif;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* ===== 上方：钟表 ===== */
+  .clock {
+    width: min(85vw, 58vh, 460px);
+    height: auto;
+    flex: 0 0 auto;
+  }
+
+  .clock .dial {
+    fill: var(--dial);
+    stroke: none;
+  }
+
+  .clock text {
+    font-family: inherit;
+  }
+
+  .hand {
+    stroke-linecap: round;
+  }
+
+  #hourHand   { stroke: hsl(0 0% 97%); stroke-width: 8; }
+  #minuteHand { stroke: hsl(0 0% 97%); stroke-width: 5; }
+  #secondHand { stroke: var(--red);   stroke-width: 2.5; }
+
+  /* ===== 下方：时间 ===== */
+  .time {
+    font-size: clamp(30px, 11vmin, 68px);
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    color: #f8fafc;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .date {
+    font-size: clamp(15px, 3.6vmin, 21px);
+    color: #cbd5e1;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============ 上方：钟表 ============ -->
+  <svg class="clock" viewBox="0 0 300 300" role="img" aria-label="模拟时钟">
+    <circle class="dial" cx="150" cy="150" r="145" />
+    <g id="ticks"></g>
+    <g id="numbers"></g>
+    <g id="hands">
+      <line id="hourHand"   class="hand" x1="150" y1="150" x2="150" y2="78" />
+      <line id="minuteHand" class="hand" x1="150" y1="150" x2="150" y2="46" />
+      <line id="secondHand" class="hand" x1="150" y1="162" x2="150" y2="32" />
+    </g>
+    <circle cx="150" cy="150" r="7" fill="hsl(0 0% 4%)" stroke="hsl(0 0% 97%)" stroke-width="2" />
+    <circle cx="150" cy="150" r="2.5" fill="var(--red)" />
+  </svg>
+
+  <!-- ============ 下方：时间 ============ -->
+  <div class="time" id="time">--:--:--</div>
+  <div class="date" id="date">&nbsp;</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const NS = 'http://www.w3.org/2000/svg';
+  const CX = 150, CY = 150;
+
+  const ticksG   = document.getElementById('ticks');
+  const numbersG = document.getElementById('numbers');
+  const hourHand   = document.getElementById('hourHand');
+  const minuteHand = document.getElementById('minuteHand');
+  const secondHand = document.getElementById('secondHand');
+  const timeEl  = document.getElementById('time');
+  const dateEl  = document.getElementById('date');
+
+  /* ---------- 1. 生成刻度 ---------- */
+  for (let i = 0; i < 60; i++) {
+    const major = i % 5 === 0;
+    const rad = (i * 6) * Math.PI / 180;
+    const rInner = major ? 124 : 130;
+    const rOuter = 136;
+
+    const line = document.createElementNS(NS, 'line');
+    line.setAttribute('x1', CX + Math.sin(rad) * rInner);
+    line.setAttribute('y1', CY - Math.cos(rad) * rInner);
+    line.setAttribute('x2', CX + Math.sin(rad) * rOuter);
+    line.setAttribute('y2', CY - Math.cos(rad) * rOuter);
+    line.setAttribute('stroke', major ? 'hsl(0 0% 88%)' : 'hsl(0 0% 100% / 0.28)');
+    line.setAttribute('stroke-width', major ? 3 : 1.4);
+    line.setAttribute('stroke-linecap', 'round');
+    ticksG.appendChild(line);
+  }
+
+  /* ---------- 2. 生成 1~12 数字（半径 99 → 106，贴近刻度） ---------- */
+  for (let n = 1; n <= 12; n++) {
+    const rad = (n * 30) * Math.PI / 180;
+    const r = 106;
+
+    const text = document.createElementNS(NS, 'text');
+    text.setAttribute('x', CX + Math.sin(rad) * r);
+    text.setAttribute('y', CY - Math.cos(rad) * r);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('dominant-baseline', 'central');
+    text.setAttribute('font-size', '22');
+    text.setAttribute('font-weight', '600');
+    text.setAttribute('fill', 'hsl(0 0% 82%)');
+    text.textContent = n;
+    numbersG.appendChild(text);
+  }
+
+  /* ---------- 3. 工具函数 ---------- */
+  const pad2 = n => (n < 10 ? '0' + n : String(n));
+  const WEEK = ['日', '一', '二', '三', '四', '五', '六'];
+
+  /* ---------- 4. 渲染 ---------- */
+  function render(now) {
+    const h  = now.getHours();
+    const m  = now.getMinutes();
+    const s  = now.getSeconds();
+    const ms = now.getMilliseconds();
+
+    const secDeg  = (s + ms / 1000) * 6;
+    const minDeg  = (m + s / 60) * 6;
+    const hourDeg = ((h % 12) + m / 60 + s / 3600) * 30;
+
+    secondHand.setAttribute('transform', `rotate(${secDeg} ${CX} ${CY})`);
+    minuteHand.setAttribute('transform', `rotate(${minDeg} ${CX} ${CY})`);
+    hourHand  .setAttribute('transform', `rotate(${hourDeg} ${CX} ${CY})`);
+
+    timeEl.textContent = `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
+
+    dateEl.textContent =
+      `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 ` +
+      `星期${WEEK[now.getDay()]}`;
+  }
+
+  /* ---------- 5. 核心：用 setTimeout 对齐到整秒 ---------- */
+  function tick() {
+    render(new Date());
+    const delay = 1001 - Date.now() % 1000;
+    setTimeout(tick, delay);
+  }
+
+  /* ---------- 6. 启动 ---------- */
+  tick();
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) render(new Date());
+  });
+})();
+</script>
+</body>
+</html>
