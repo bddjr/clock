@@ -176,22 +176,24 @@
 
     timeEl.textContent = `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
 
-    dateEl.textContent =
-      `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 星期${WEEK[now.getDay()]}`;
+    dateEl.textContent = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 星期${WEEK[now.getDay()]}`;
   }
 
   /* ---------- 5. 核心：用 setTimeout 对齐到整秒 ---------- */
+  let timeoutId;
   function tick() {
+    if (timeoutId !== undefined) {
+      clearTimeout(timeoutId);
+      timeoutId = undefined;
+    }
     if (document.hidden) return;
     const date = new Date();
-    const delay = 1001 - date.getTime() % 1000;
+    timeoutId = setTimeout(tick, 1001 - date.getTime() % 1000);
     render(date);
-    setTimeout(tick, delay);
   }
 
   /* ---------- 6. 启动 ---------- */
   tick();
-
   document.addEventListener('visibilitychange', tick);
 })();
 </script>
