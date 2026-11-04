@@ -11,17 +11,13 @@
   @font-face {
     font-family: "HarmonyOS Sans SC";
     src: url("./fonts/HarmonyOS_Sans_SC_Regular-subset.woff2") format("woff2");
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
   }
 
   :root {
     color-scheme: dark;
     --bg: #000000;
-    --dial: hsl(0 0% 7% / 1);
+    --dial: hsl(0 0% 5%);
     --text: #e5e7eb;
-    --muted: #94a3b8;
     --red: #ef4444;
   }
 
@@ -67,25 +63,24 @@
     stroke-linecap: round;
   }
 
-  #hourHand   { stroke: hsl(0 0% 97%); stroke-width: 8; }
-  #minuteHand { stroke: hsl(0 0% 97%); stroke-width: 5; }
+  #hourHand   { stroke: hsl(0 0% 86%); stroke-width: 6.5; }
+  #minuteHand { stroke: hsl(0 0% 86%); stroke-width: 4.5; }
   #secondHand { stroke: var(--red);   stroke-width: 2.5; }
 
   /* ===== 下方：时间 ===== */
   .time {
     font-size: clamp(30px, 11vmin, 68px);
-    font-weight: 400;
     letter-spacing: 0.04em;
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
-    color: #f8fafc;
+    color: white;
     line-height: 1;
     white-space: nowrap;
   }
 
   .date {
     font-size: clamp(15px, 3.6vmin, 21px);
-    color: #cbd5e1;
+    color: #bbb;
     letter-spacing: 0.04em;
     white-space: nowrap;
   }
@@ -98,18 +93,18 @@
     <circle class="dial" cx="150" cy="150" r="145" />
     <g id="ticks"></g>
     <g id="numbers"></g>
+    <circle cx="150" cy="150" r="7" fill="hsl(0 0% 86%)" />
     <g id="hands">
-      <line id="hourHand"   class="hand" x1="150" y1="150" x2="150" y2="78" />
-      <line id="minuteHand" class="hand" x1="150" y1="150" x2="150" y2="46" />
-      <line id="secondHand" class="hand" x1="150" y1="162" x2="150" y2="32" />
+      <line id="hourHand"   class="hand" x1="150" y1="150" x2="150" y2="70" />
+      <line id="minuteHand" class="hand" x1="150" y1="150" x2="150" y2="38" />
+      <line id="secondHand" class="hand" x1="150" y1="162" x2="150" y2="28" />
     </g>
-    <circle cx="150" cy="150" r="7" fill="hsl(0 0% 4%)" stroke="hsl(0 0% 97%)" stroke-width="2" />
-    <circle cx="150" cy="150" r="2.5" fill="var(--red)" />
+    <circle cx="150" cy="150" r="4" fill="var(--red)" />
   </svg>
 
   <!-- ============ 下方：时间 ============ -->
-  <div class="time" id="time">--:--:--</div>
-  <div class="date" id="date">&nbsp;</div>
+  <div class="time" id="time">00:00:00</div>
+  <div class="date" id="date">1970年1月1日 星期四</div>
 
 <script>
 (function () {
@@ -130,16 +125,16 @@
   for (let i = 0; i < 60; i++) {
     const major = i % 5 === 0;
     const rad = (i * 6) * Math.PI / 180;
-    const rInner = major ? 124 : 130;
-    const rOuter = 136;
+    const rInner = major ? 128 : 132;
+    const rOuter = 138;
 
     const line = document.createElementNS(NS, 'line');
     line.setAttribute('x1', CX + Math.sin(rad) * rInner);
     line.setAttribute('y1', CY - Math.cos(rad) * rInner);
     line.setAttribute('x2', CX + Math.sin(rad) * rOuter);
     line.setAttribute('y2', CY - Math.cos(rad) * rOuter);
-    line.setAttribute('stroke', major ? 'hsl(0 0% 88%)' : 'hsl(0 0% 100% / 0.28)');
-    line.setAttribute('stroke-width', major ? 3 : 1.4);
+    line.setAttribute('stroke', 'hsl(0 0% 30%)');
+    line.setAttribute('stroke-width', major ? '4.5' : '2.5');
     line.setAttribute('stroke-linecap', 'round');
     ticksG.appendChild(line);
   }
@@ -147,22 +142,21 @@
   /* ---------- 2. 生成 1~12 数字（半径 99 → 106，贴近刻度） ---------- */
   for (let n = 1; n <= 12; n++) {
     const rad = (n * 30) * Math.PI / 180;
-    const r = 106;
+    const r = 108;
 
     const text = document.createElementNS(NS, 'text');
     text.setAttribute('x', CX + Math.sin(rad) * r);
     text.setAttribute('y', CY - Math.cos(rad) * r);
     text.setAttribute('text-anchor', 'middle');
     text.setAttribute('dominant-baseline', 'central');
-    text.setAttribute('font-size', '22');
-    text.setAttribute('font-weight', '600');
-    text.setAttribute('fill', 'hsl(0 0% 82%)');
+    text.setAttribute('font-size', '20');
+    text.setAttribute('fill', 'hsl(0 0% 70%)');
     text.textContent = n;
     numbersG.appendChild(text);
   }
 
   /* ---------- 3. 工具函数 ---------- */
-  const pad2 = n => (n < 10 ? '0' + n : String(n));
+  const pad2 = n => (n > 9 ? '' + n : '0' + n);
   const WEEK = ['日', '一', '二', '三', '四', '五', '六'];
 
   /* ---------- 4. 渲染 ---------- */
@@ -172,7 +166,7 @@
     const s  = now.getSeconds();
     const ms = now.getMilliseconds();
 
-    const secDeg  = (s + ms / 1000) * 6;
+    const secDeg  = s * 6;
     const minDeg  = (m + s / 60) * 6;
     const hourDeg = ((h % 12) + m / 60 + s / 3600) * 30;
 
@@ -183,23 +177,22 @@
     timeEl.textContent = `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
 
     dateEl.textContent =
-      `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 ` +
-      `星期${WEEK[now.getDay()]}`;
+      `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 星期${WEEK[now.getDay()]}`;
   }
 
   /* ---------- 5. 核心：用 setTimeout 对齐到整秒 ---------- */
   function tick() {
-    render(new Date());
-    const delay = 1001 - Date.now() % 1000;
+    if (document.hidden) return;
+    const date = new Date();
+    const delay = 1001 - date.getTime() % 1000;
+    render(date);
     setTimeout(tick, delay);
   }
 
   /* ---------- 6. 启动 ---------- */
   tick();
 
-  document.addEventListener('visibilitychange', function () {
-    if (!document.hidden) render(new Date());
-  });
+  document.addEventListener('visibilitychange', tick);
 })();
 </script>
 </body>
