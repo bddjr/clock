@@ -188,7 +188,7 @@
     }
     if (document.hidden) return;
     const date = new Date();
-    timeoutId = setTimeout(tick, 1001 - date.getTime() % 1000);
+    timeoutId = setTimeout(tick, 1001 - date.getMilliseconds());
     render(date);
   }
 
