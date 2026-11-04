@@ -174,9 +174,10 @@
     minuteHand.setAttribute('transform', `rotate(${minDeg} ${CX} ${CY})`);
     hourHand  .setAttribute('transform', `rotate(${hourDeg} ${CX} ${CY})`);
 
-    timeEl.textContent = `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
+    timeEl.innerText = `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
 
-    dateEl.textContent = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 星期${WEEK[now.getDay()]}`;
+    const dateText = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 星期${WEEK[now.getDay()]}`;
+    if (dateEl.innerText !== dateText) dateEl.innerText = dateText;
   }
 
   /* ---------- 5. 核心：用 setTimeout 对齐到整秒 ---------- */
