@@ -30,6 +30,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    /* safe center：内容放不下时自动退回“顶部对齐+可滚动”，避免顶部被裁掉 */
+    justify-content: safe center;
+    overflow: auto;
     gap: clamp(10px, 2.6vh, 26px);
     padding: clamp(10px, 2.5vh, 32px) clamp(10px, 4vw, 32px);
     background: black;
@@ -40,7 +43,9 @@
 
   /* ===== 上方：钟表 ===== */
   .clock {
-    width: min(85vw, 58vh, 460px);
+    /* clamp(下限, 首选值, 上限)：视口再小，时钟也保底 170px，不会缩没 */
+    width: clamp(170px, min(85vw, 58vh), 460px);
+    flex-shrink: 0;
   }
 
   .hand {
