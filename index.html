@@ -14,6 +14,8 @@
   }
 
   :root {
+    color-scheme: dark;
+    /* only：明确禁止内核/系统再做自动反色、提亮（QQ 内置 X5 会篡改 SVG 深色） */
     color-scheme: only dark;
     --red: #ef4444;
   }
@@ -46,15 +48,17 @@
     /* clamp(下限, 首选值, 上限)：视口再小，时钟也保底 170px，不会缩没 */
     width: clamp(170px, min(85vw, 58vh), 460px);
     flex-shrink: 0;
+    forced-color-adjust: none;   /* 拒绝系统强制配色改写本 SVG */
   }
 
   .hand {
     stroke-linecap: round;
   }
 
-  #hourHand   { stroke: hsl(0 0% 86%); stroke-width: 6.5; }
-  #minuteHand { stroke: hsl(0 0% 86%); stroke-width: 4.5; }
-  #secondHand { stroke: var(--red);      stroke-width: 2.5; }
+  /* 全部用 hex，避开老内核对现代 hsl() 的解析差异 */
+  #hourHand   { stroke: #dbdbdb;   stroke-width: 6.5; }
+  #minuteHand { stroke: #dbdbdb;   stroke-width: 4.5; }
+  #secondHand { stroke: var(--red); stroke-width: 2.5; }
 
   /* ===== 下方：时间 ===== */
   .time {
@@ -79,16 +83,20 @@
 
   <!-- ============ 上方：钟表 ============ -->
   <svg class="clock" viewBox="0 0 300 300" role="img" aria-label="模拟时钟">
-    <circle cx="150" cy="150" r="145" fill="hsl(0 0% 5%)" />
+    <!-- 表盘不写深色值：用「白色 + 低透明度」叠在黑底上得到深灰 #0d0d0d。
+         QQ 安卓 X5 的强制暗色会把 SVG 里的深色一律提亮成 #a0a0a0，
+         写成白色半透明后它便无从篡改，同时保持原视觉。 -->
+    <circle cx="150" cy="150" r="145" fill="#ffffff" fill-opacity="0.05" />
+    <circle cx="150" cy="150" r="145" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="1.5" />
     <g id="ticks"></g>
     <g id="numbers"></g>
-    <circle cx="150" cy="150" r="7" fill="hsl(0 0% 86%)" />
+    <circle cx="150" cy="150" r="7" fill="#dbdbdb" />
     <g id="hands">
       <line id="hourHand"   class="hand" x1="150" y1="150" x2="150" y2="70" />
       <line id="minuteHand" class="hand" x1="150" y1="150" x2="150" y2="38" />
       <line id="secondHand" class="hand" x1="150" y1="162" x2="150" y2="28" />
     </g>
-    <circle cx="150" cy="150" r="4" fill="var(--red)" />
+    <circle cx="150" cy="150" r="4" fill="#ef4444" />
   </svg>
 
   <!-- ============ 下方：时间 ============ -->
@@ -120,7 +128,9 @@
     line.setAttribute('y1', CY - Math.cos(rad) * rInner);
     line.setAttribute('x2', CX + Math.sin(rad) * rOuter);
     line.setAttribute('y2', CY - Math.cos(rad) * rOuter);
-    line.setAttribute('stroke', 'hsl(0 0% 30%)');
+    /* 刻度同样用「白色 + 透明度」表达深灰，不给强制暗色留深色可改 */
+    line.setAttribute('stroke', '#ffffff');
+    line.setAttribute('stroke-opacity', major ? '0.34' : '0.18');
     line.setAttribute('stroke-width', major ? '4.5' : '2.5');
     line.setAttribute('stroke-linecap', 'round');
     ticksG.appendChild(line);
@@ -137,7 +147,7 @@
     text.setAttribute('text-anchor', 'middle');
     text.setAttribute('dominant-baseline', 'central');
     text.setAttribute('font-size', '20');
-    text.setAttribute('fill', 'hsl(0 0% 70%)');
+    text.setAttribute('fill', '#b3b3b3');
     text.textContent = n;
     numbersG.appendChild(text);
   }
