@@ -64,11 +64,18 @@
   .time {
     font-size: clamp(30px, 11vmin, 68px);
     letter-spacing: 0.04em;
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum";
     color: white;
     line-height: 1;
     white-space: nowrap;
+  }
+
+  .time, .clock {
+    /* HarmonyOS Sans 的「等宽时钟数字」是 ss01 这套独立字形，
+       系统时钟用的正是它（华为 TextClock 文档：fontFeature '"ss01" on'）。
+       ss01 自带等宽字形 + 专用时钟冒号，故不再用普通的 tnum。 */
+    -webkit-font-feature-settings: "ss01" 1;
+    font-feature-settings: "ss01" 1;
+    font-variant-numeric: normal;
   }
 
   .date {
