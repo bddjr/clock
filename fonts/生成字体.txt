@@ -4,7 +4,7 @@ https://developer.huawei.com/consumer/cn/design/resource-V1/
 2. 使用以下提示词让 AI 生成 chars.txt ：
 我需要字体子集化，告诉我这个网页需要哪些字。
 
-3. 在以下网站把字体子集化，导出 ttf
+3. 在以下网站把字体子集化，记得在高级选项里勾选“保留全部 OpenType 排版特性”，然后导出 ttf
 https://deertools.cn/tools/font-subset
 
 4. 在以下网站把 ttf 转成 woff2
